@@ -55,18 +55,24 @@ export function GlassmorphismNav() {
   }, [])
 
   const scrollToSection = (href: string) => {
-    const element = document.querySelector(href)
-    if (element) {
-      const rect = element.getBoundingClientRect()
-      const currentScrollY = window.pageYOffset || document.documentElement.scrollTop
-      const elementAbsoluteTop = rect.top + currentScrollY
-      const navbarHeight = 100
-      const targetPosition = Math.max(0, elementAbsoluteTop - navbarHeight)
+    if (href.startsWith("#")) {
+      const element = document.querySelector(href)
+      if (element) {
+        const rect = element.getBoundingClientRect()
+        const currentScrollY = window.pageYOffset || document.documentElement.scrollTop
+        const elementAbsoluteTop = rect.top + currentScrollY
+        const navbarHeight = 100
+        const targetPosition = Math.max(0, elementAbsoluteTop - navbarHeight)
 
-      window.scrollTo({
-        top: targetPosition,
-        behavior: "smooth",
-      })
+        window.scrollTo({
+          top: targetPosition,
+          behavior: "smooth",
+        })
+      } else {
+        window.location.href = `/${href}`
+      }
+    } else {
+      window.location.href = href
     }
     setIsOpen(false)
   }
@@ -151,51 +157,44 @@ export function GlassmorphismNav() {
 
         {/* Mobile Menu */}
         <div className="md:hidden relative">
-          <div
-            className={`fixed inset-0 bg-black/20 backdrop-blur-sm transition-all duration-300 ${
-              isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-            }`}
-            onClick={() => setIsOpen(false)}
-            style={{ top: "0", left: "0", right: "0", bottom: "0", zIndex: -1 }}
-          />
+          {isOpen && (
+            <div
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm transition-all duration-300"
+              onClick={() => setIsOpen(false)}
+            />
+          )}
 
-          <div
-            className={`mt-2 w-[92vw] max-w-sm mx-auto transition-all duration-500 ease-out transform-gpu ${
-              isOpen ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-8 scale-95 pointer-events-none"
-            }`}
-          >
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 shadow-2xl">
-              <div className="flex flex-col space-y-1">
-                {navigation.map((item, index) => (
+          {isOpen && (
+            <div className="relative z-10 mt-2 w-[92vw] max-w-sm mx-auto transition-all duration-500 ease-out transform-gpu opacity-100 translate-y-0 scale-100">
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 shadow-2xl">
+                <div className="flex flex-col space-y-1">
+                  {navigation.map((item, index) => (
+                    <button
+                      key={item.name}
+                      onClick={() => scrollToSection(item.href)}
+                      className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg px-3 py-3.5 text-left transition-all duration-300 font-medium cursor-pointer animate-mobile-menu-item"
+                      style={{
+                        animationDelay: `${index * 80 + 100}ms`,
+                      }}
+                    >
+                      {item.name}
+                    </button>
+                  ))}
+                  <div className="h-px bg-white/10 my-2" />
                   <button
-                    key={item.name}
-                    onClick={() => scrollToSection(item.href)}
-                    className={`text-white/80 hover:text-white hover:bg-white/10 rounded-lg px-3 py-3.5 text-left transition-all duration-300 font-medium cursor-pointer ${
-                      isOpen ? "animate-mobile-menu-item" : ""
-                    }`}
+                    onClick={() => scrollToSection("#contact")}
+                    className="relative bg-white hover:bg-gray-50 text-black font-medium px-6 py-3.5 rounded-full w-full flex items-center justify-center transition-all duration-300 hover:scale-105 cursor-pointer group transform animate-mobile-menu-item"
                     style={{
-                      animationDelay: isOpen ? `${index * 80 + 100}ms` : "0ms",
+                      animationDelay: `${navigation.length * 80 + 150}ms`,
                     }}
                   >
-                    {item.name}
+                    <span className="mr-2">Get Your Free Audit</span>
+                    <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
                   </button>
-                ))}
-                <div className="h-px bg-white/10 my-2" />
-                <button
-                  onClick={() => scrollToSection("#contact")}
-                  className={`relative bg-white hover:bg-gray-50 text-black font-medium px-6 py-3.5 rounded-full w-full flex items-center justify-center transition-all duration-300 hover:scale-105 cursor-pointer group transform ${
-                    isOpen ? "animate-mobile-menu-item" : ""
-                  }`}
-                  style={{
-                    animationDelay: isOpen ? `${navigation.length * 80 + 150}ms` : "0ms",
-                  }}
-                >
-                  <span className="mr-2">Get Your Free Audit</span>
-                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
-                </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </nav>
     </>

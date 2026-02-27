@@ -124,6 +124,11 @@ export default function Aurora(props) {
     const ctn = ctnDom.current
     if (!ctn) return
 
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches
+    const resolutionScale = isTouchDevice ? 0.7 : 1
+    const targetFps = isTouchDevice ? 30 : 60
+    const frameInterval = 1000 / targetFps
+
     const renderer = new Renderer({
       alpha: true,
       premultipliedAlpha: true,
@@ -134,6 +139,7 @@ export default function Aurora(props) {
     gl.enable(gl.BLEND)
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
     gl.canvas.style.backgroundColor = "transparent"
+    gl.canvas.style.pointerEvents = "none"
 
     const geometry = new Triangle(gl)
     if (geometry.attributes.uv) {
@@ -160,8 +166,12 @@ export default function Aurora(props) {
     function resize() {
       const width = window.innerWidth
       const height = window.innerHeight
-      renderer.setSize(width, height)
-      program.uniforms.uResolution.value = [width, height]
+      const scaledWidth = Math.max(1, Math.floor(width * resolutionScale))
+      const scaledHeight = Math.max(1, Math.floor(height * resolutionScale))
+      renderer.setSize(scaledWidth, scaledHeight)
+      gl.canvas.style.width = `${width}px`
+      gl.canvas.style.height = `${height}px`
+      program.uniforms.uResolution.value = [scaledWidth, scaledHeight]
     }
     window.addEventListener("resize", resize)
 
@@ -171,8 +181,12 @@ export default function Aurora(props) {
     resize()
 
     let animateId = 0
+    let lastFrame = 0
     const update = (t) => {
       animateId = requestAnimationFrame(update)
+      if (t - lastFrame < frameInterval) return
+      lastFrame = t
+
       const { time = t * 0.01, speed = 1.0 } = propsRef.current
       program.uniforms.uTime.value = time * speed * 0.1
       program.uniforms.uAmplitude.value = propsRef.current.amplitude ?? 1.0

@@ -80,7 +80,7 @@ export function HeroSection() {
           <Button
             size="lg"
             onClick={scrollToContact}
-            className="bg-white text-black rounded-full w-full max-w-[18rem] sm:w-auto sm:max-w-none px-8 sm:px-11 py-4 sm:py-[1.125rem] text-lg sm:text-xl font-semibold tracking-tight transition-all duration-300 hover:bg-white/90 hover:scale-105 hover:shadow-2xl hover:shadow-white/20 group cursor-pointer shadow-xl ring-1 ring-white/70"
+            className="bg-white text-black rounded-full w-full max-w-[15rem] sm:w-auto sm:max-w-none px-6 sm:px-10 py-3.5 sm:py-4 text-base sm:text-lg font-semibold tracking-tight transition-all duration-300 hover:bg-white/90 hover:scale-105 hover:shadow-2xl hover:shadow-white/20 group cursor-pointer shadow-xl ring-1 ring-white/70"
           >
             Get Started
           </Button>
