@@ -27,8 +27,7 @@ export function HeroSection() {
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    const isSmallOrTouchScreen = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches
-    setEnableHeadlineAnimation(!prefersReducedMotion && !isSmallOrTouchScreen)
+    setEnableHeadlineAnimation(!prefersReducedMotion)
   }, [])
 
   const scrollToContact = () => {

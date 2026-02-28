@@ -33,15 +33,22 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
-function normalizeFromAddress(value: string) {
+function normalizeEmailAddress(value: string, keepDisplayName = false) {
   const trimmed = value.trim()
+  if (!trimmed) return null
 
   // Prefer "Name <email@domain>" and ignore any accidental trailing tokens.
-  const namedMatch = trimmed.match(/^([^<>\r\n]+?)\s*<([^<>\s@]+@[^\s@]+\.[^\s@]+)>/)
+  const namedMatch = trimmed.match(/^([^<>\r\n]+?)\s*<\s*([^<>\s@]+@[^\s@]+\.[^\s@]+)\s*>/)
   if (namedMatch) {
     const name = namedMatch[1].trim()
     const email = namedMatch[2].trim()
-    return name ? `${name} <${email}>` : email
+    return keepDisplayName && name ? `${name} <${email}>` : email
+  }
+
+  // Accept accidental angle-bracket-only format: "<email@domain>".
+  const bracketOnlyMatch = trimmed.match(/^<\s*([^<>\s@]+@[^\s@]+\.[^\s@]+)\s*>/)
+  if (bracketOnlyMatch) {
+    return bracketOnlyMatch[1].trim()
   }
 
   // Fall back to plain email and ignore trailing tokens.
@@ -51,6 +58,13 @@ function normalizeFromAddress(value: string) {
   }
 
   return null
+}
+
+function normalizeToAddresses(value: string) {
+  return value
+    .split(/[;,]/)
+    .map((entry) => normalizeEmailAddress(entry, false))
+    .filter((entry): entry is string => Boolean(entry))
 }
 
 function getClientIp(request: Request) {
@@ -84,7 +98,8 @@ function isRateLimited(clientIp: string) {
 }
 
 export async function POST(request: Request) {
-  const fromAddress = normalizeFromAddress(CONTACT_EMAIL_FROM)
+  const fromAddress = normalizeEmailAddress(CONTACT_EMAIL_FROM, true)
+  const toAddresses = CONTACT_EMAIL_TO ? normalizeToAddresses(CONTACT_EMAIL_TO) : []
 
   if (!resend || !CONTACT_EMAIL_TO) {
     return NextResponse.json(
@@ -96,6 +111,13 @@ export async function POST(request: Request) {
   if (!fromAddress) {
     return NextResponse.json(
       { error: "Email service is not configured. CONTACT_EMAIL_FROM is invalid." },
+      { status: 500 },
+    )
+  }
+
+  if (toAddresses.length === 0) {
+    return NextResponse.json(
+      { error: "Email service is not configured. CONTACT_EMAIL_TO is invalid." },
       { status: 500 },
     )
   }
@@ -148,7 +170,7 @@ export async function POST(request: Request) {
   try {
     await resend.emails.send({
       from: fromAddress,
-      to: [CONTACT_EMAIL_TO],
+      to: toAddresses,
       replyTo: email,
       subject: `New Lead Submission - ${name}`,
       html: `

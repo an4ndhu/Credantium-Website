@@ -9,11 +9,7 @@ const Aurora = dynamic(() => import("./Aurora"), {
 
 function shouldEnableAurora() {
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  const isSmallOrTouchScreen = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches
-  const navWithMemory = navigator as Navigator & { deviceMemory?: number }
-  const isLowMemoryDevice = typeof navWithMemory.deviceMemory === "number" && navWithMemory.deviceMemory <= 4
-
-  return !prefersReducedMotion && !isSmallOrTouchScreen && !isLowMemoryDevice
+  return !prefersReducedMotion
 }
 
 export function AuroraBackground() {
