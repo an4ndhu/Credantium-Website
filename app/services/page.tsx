@@ -1,5 +1,3 @@
-"use client"
-
 import { GlassmorphismNav } from "@/components/glassmorphism-nav"
 import { Footer } from "@/components/footer"
 import { Bot, Workflow, MessageSquare, BarChart3, Zap, HeadphonesIcon } from "lucide-react"

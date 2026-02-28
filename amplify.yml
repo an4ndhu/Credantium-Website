@@ -7,8 +7,8 @@ frontend:
     build:
       commands:
         - rm -f .env.production
-        - env | grep -e RESEND_API_KEY -e CONTACT_EMAIL_TO -e CONTACT_EMAIL_FROM -e CONTACT_RATE_LIMIT_WINDOW_MS -e CONTACT_RATE_LIMIT_MAX -e CONTACT_MIN_SUBMIT_MS >> .env.production || true
-        - env | grep -e NEXT_PUBLIC_ >> .env.production || true
+        - env | grep -E '^(RESEND_API_KEY|CONTACT_EMAIL_TO|CONTACT_EMAIL_FROM|CONTACT_RATE_LIMIT_WINDOW_MS|CONTACT_RATE_LIMIT_MAX|CONTACT_MIN_SUBMIT_MS)=' >> .env.production || true
+        - env | grep -E '^NEXT_PUBLIC_' >> .env.production || true
         - npm run build
   artifacts:
     baseDirectory: .next

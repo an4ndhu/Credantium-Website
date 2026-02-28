@@ -33,6 +33,26 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
+function normalizeFromAddress(value: string) {
+  const trimmed = value.trim()
+
+  // Prefer "Name <email@domain>" and ignore any accidental trailing tokens.
+  const namedMatch = trimmed.match(/^([^<>\r\n]+?)\s*<([^<>\s@]+@[^\s@]+\.[^\s@]+)>/)
+  if (namedMatch) {
+    const name = namedMatch[1].trim()
+    const email = namedMatch[2].trim()
+    return name ? `${name} <${email}>` : email
+  }
+
+  // Fall back to plain email and ignore trailing tokens.
+  const emailMatch = trimmed.match(/^([^<>\s@]+@[^\s@]+\.[^\s@]+)/)
+  if (emailMatch) {
+    return emailMatch[1].trim()
+  }
+
+  return null
+}
+
 function getClientIp(request: Request) {
   const forwardedFor = request.headers.get("x-forwarded-for")
   if (forwardedFor) {
@@ -64,9 +84,18 @@ function isRateLimited(clientIp: string) {
 }
 
 export async function POST(request: Request) {
+  const fromAddress = normalizeFromAddress(CONTACT_EMAIL_FROM)
+
   if (!resend || !CONTACT_EMAIL_TO) {
     return NextResponse.json(
       { error: "Email service is not configured. Add RESEND_API_KEY and CONTACT_EMAIL_TO." },
+      { status: 500 },
+    )
+  }
+
+  if (!fromAddress) {
+    return NextResponse.json(
+      { error: "Email service is not configured. CONTACT_EMAIL_FROM is invalid." },
       { status: 500 },
     )
   }
@@ -118,7 +147,7 @@ export async function POST(request: Request) {
 
   try {
     await resend.emails.send({
-      from: CONTACT_EMAIL_FROM,
+      from: fromAddress,
       to: [CONTACT_EMAIL_TO],
       replyTo: email,
       subject: `New Lead Submission - ${name}`,

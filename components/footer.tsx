@@ -1,13 +1,10 @@
-"use client"
-import type React from "react"
-import type { ComponentProps, ReactNode } from "react"
-import { motion, useReducedMotion } from "framer-motion"
+import type { ComponentType, ReactNode } from "react"
 import Image from "next/image"
 
 interface FooterLink {
   title: string
   href: string
-  icon?: React.ComponentType<{ className?: string }>
+  icon?: ComponentType<{ className?: string }>
 }
 
 interface FooterSection {
@@ -47,8 +44,8 @@ export function Footer() {
         </AnimatedContainer>
 
         <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 gap-8 md:grid-cols-4 xl:col-span-2 xl:mt-0">
-          {footerLinks.map((section, index) => (
-            <AnimatedContainer key={section.label} delay={0.1 + index * 0.1}>
+          {footerLinks.map((section) => (
+            <AnimatedContainer key={section.label}>
               <div className="mb-10 md:mb-0">
                 <h3 className="text-xs">{section.label}</h3>
                 <ul className="text-muted-foreground mt-4 space-y-2 text-sm">
@@ -83,27 +80,10 @@ export function Footer() {
 }
 
 type ViewAnimationProps = {
-  delay?: number
-  className?: ComponentProps<typeof motion.div>["className"]
+  className?: string
   children: ReactNode
 }
 
-function AnimatedContainer({ className, delay = 0.1, children }: ViewAnimationProps) {
-  const shouldReduceMotion = useReducedMotion()
-
-  if (shouldReduceMotion) {
-    return children
-  }
-
-  return (
-    <motion.div
-      initial={{ filter: "blur(4px)", translateY: -8, opacity: 0 }}
-      whileInView={{ filter: "blur(0px)", translateY: 0, opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ delay, duration: 0.8 }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  )
+function AnimatedContainer({ className, children }: ViewAnimationProps) {
+  return <div className={className}>{children}</div>
 }

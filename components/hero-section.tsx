@@ -1,8 +1,9 @@
 "use client"
 
-import type { ComponentType } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import RotatingText from "./RotatingText"
+import dynamic from "next/dynamic"
+import type { ComponentType } from "react"
 
 type RotatingTextProps = {
   texts: string[]
@@ -17,8 +18,18 @@ type RotatingTextProps = {
   rotationInterval?: number
 }
 
+const RotatingText = dynamic(() => import("./RotatingText").then((mod) => mod.default as ComponentType<RotatingTextProps>), {
+  loading: () => null,
+})
+
 export function HeroSection() {
-  const RotatingTextComponent = RotatingText as unknown as ComponentType<RotatingTextProps>
+  const [enableHeadlineAnimation, setEnableHeadlineAnimation] = useState(false)
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    const isSmallOrTouchScreen = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches
+    setEnableHeadlineAnimation(!prefersReducedMotion && !isSmallOrTouchScreen)
+  }, [])
 
   const scrollToContact = () => {
     const element = document.querySelector("#contact")
@@ -54,18 +65,24 @@ export function HeroSection() {
           <br />
           <span className="inline-flex items-center justify-center flex-wrap gap-1 sm:gap-2 mt-2 sm:mt-4 md:mt-6 lg:mt-8">
             <span className="text-white">Business</span>
-            <RotatingTextComponent
-              texts={["Growth", "Innovation", "Efficiency", "Success"]}
-              mainClassName="min-w-[9.5ch] px-1.5 sm:px-2 md:px-3 bg-white text-black overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg shadow-lg"
-              staggerFrom={"last"}
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "-120%" }}
-              staggerDuration={0.025}
-              splitLevelClassName="overflow-hidden pb-1 sm:pb-1 md:pb-1"
-              transition={{ type: "spring", damping: 30, stiffness: 400 }}
-              rotationInterval={2000}
-            />
+            {enableHeadlineAnimation ? (
+              <RotatingText
+                texts={["Growth", "Innovation", "Efficiency", "Success"]}
+                mainClassName="min-w-[9.5ch] px-1.5 sm:px-2 md:px-3 bg-white text-black overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg shadow-lg"
+                staggerFrom={"last"}
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "-120%" }}
+                staggerDuration={0.025}
+                splitLevelClassName="overflow-hidden pb-1 sm:pb-1 md:pb-1"
+                transition={{ type: "spring", damping: 30, stiffness: 400 }}
+                rotationInterval={2000}
+              />
+            ) : (
+              <span className="min-w-[9.5ch] px-1.5 sm:px-2 md:px-3 bg-white text-black py-0.5 sm:py-1 md:py-2 rounded-lg shadow-lg">
+                Growth
+              </span>
+            )}
           </span>
         </h1>
 

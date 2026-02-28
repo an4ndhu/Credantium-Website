@@ -1,19 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
 import "./globals.css"
-import { Dancing_Script, Caveat } from "next/font/google"
-
-const dancingScript = Dancing_Script({
-  subsets: ["latin"],
-  variable: "--font-dancing-script",
-  display: "swap",
-})
-
-const caveat = Caveat({
-  subsets: ["latin"],
-  variable: "--font-caveat",
-  display: "swap",
-})
 
 export const metadata: Metadata = {
   title: "Credantium - AI Automation Agency",
@@ -33,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`font-sans antialiased ${dancingScript.variable} ${caveat.variable}`}>
+      <body className="font-sans antialiased">
         {children}
       </body>
     </html>
